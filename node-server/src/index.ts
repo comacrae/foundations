@@ -43,7 +43,8 @@ const server = http
         }catch(error){
             console.error(error);
             res.statusCode=Status.BAD_REQUEST;
-            res.end(JSON.stringify(error))
+            const message = error instanceof Error ? error.message : "Unknown error";
+            res.end(JSON.stringify({error:message}))
         }
 
 
