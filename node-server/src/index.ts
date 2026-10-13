@@ -14,9 +14,9 @@ const controller = new Controller(new UserRepository());
 
 const readBody = async (req:IncomingMessage): Promise<string>  => {
     return new Promise<string>((resolve,reject)=>{
-        let body = [];
+        let body:Buffer[] = [];
         req.on('error', (err)=>{
-            reject(error);
+            reject(err);
         }).on('data', chunk =>{
             body.push(chunk);
         }).on('end',() => {
@@ -35,6 +35,10 @@ const server = http
         const reqBody = await readBody(req);
 
         const {status,resBody} = controller.handle(req.method ?? "", segments,reqBody);
+        
+        res.statusCode=status;
+        res.setHeader('Content-Type','application/json');
+        res.end(JSON.stringify(resBody));
 });
 
 server.listen(3000);
