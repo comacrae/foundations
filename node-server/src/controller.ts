@@ -1,11 +1,11 @@
 import UserService from "./service.js";
-import type { User } from "./types.js";
 
 type RouteHandler = (id?:string, body?:string) => {status:Status, resBody:unknown};
-const Status = {
+export const Status = {
     NOT_FOUND:404,
     OK:200,
-    NOT_ALLOWED:405
+    NOT_ALLOWED:405,
+    BAD_REQUEST:400
 } as const;
 type Status = (typeof Status)[keyof typeof Status];
 
@@ -26,7 +26,12 @@ export default class Controller{
                 return {status:Status.OK, resBody:this.service.getUsers()}
             },
             "POST users": (_,body) => {
-                const {name,age}: {name:string, age:string} = JSON.parse(body??"");
+                const {name,age}: {name?:string, age?:string} = JSON.parse(body??"");
+                if (name === undefined)
+                    throw new Error ("Name must be defined");
+                if (age === undefined)
+                    throw new Error ("Name must be defined");
+
                 const user = this.service.addUser(name, Number(age));
                 return {status:Status.OK, resBody:user};
             },
@@ -37,8 +42,10 @@ export default class Controller{
                     return {status:Status.NOT_FOUND, resBody:undefined}
             },
             "PATCH users/:id": (id,body)=>{
-                const {name, age}:{name:string, age:string} = JSON.parse(body ?? "");
-                const user = this.service.updateUser(Number(id),name,Number(age));
+                const {name, age}:{name?:string, age?:string} = JSON.parse(body ?? "");
+                const ageNum: number | undefined = age ? Number(age) : undefined;
+                    
+                const user = this.service.updateUser(Number(id),name,ageNum);
                 return {status: user? Status.OK : Status.NOT_FOUND, resBody: user};
             }
         };
@@ -46,8 +53,11 @@ export default class Controller{
 
     public handle(method:string, segments:string[], body:string): ReturnType<RouteHandler> {
         //method is GET/POST/PATCH/DELETE
-        //segments are resourc
+        //segments are resource / id
+
         if(Controller.supportedMethods.includes(method)){
+            if(segments.length > 2)
+                return {status: Status.NOT_FOUND, resBody:undefined}
             //make sure resource segment exists
             const resource:string | undefined = segments[0];
             if(!resource) return {status:Status.NOT_FOUND, resBody:undefined};
