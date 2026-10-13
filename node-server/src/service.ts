@@ -7,9 +7,9 @@ export default class UserService{
     }
 
     private checkValidInput(name?:string, age?:number):void{
-        if(age && age <1)
+        if(age !=null && age <1)
             throw new Error(`Invalid age: ${age}. Must be >=1`);
-        if(name && name.trim().length === 0)
+        if(name != null && name.trim().length === 0)
             throw new Error(`Invalid name: ${name}. Cannot be empty`);
     }
 
