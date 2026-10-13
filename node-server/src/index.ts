@@ -1,23 +1,40 @@
-import http from "node:http";
-import { URL } from "node:url";
-import {getUser, addUser, deleteUser, getUsers, updateUser} from "./controller.js";
+import http, { IncomingMessage } from "node:http";
+import UserRepository from "./repository.js";
+import Controller from "./controller.js";
 
 /*
-* This server is a toy CRUD server allowing me to practice with raw HTTP requests
+* This server is a toy CRUD server for practicing raw HTTP requests 
+* to better appreciate the steps underlying abstractions when using fetch,
+* React Router, Next.js page layouts, etc.
 */
 
 
-const routes =  {
-        "GET users": getUsers,
-        "GET users/:id": getUser,
-        "POST users/:id": addUser,
-        "DELETE users/:id": deleteUser,
-        "PATCH users/:id": updateUser
+
+const controller = new Controller(new UserRepository());
+
+const readBody = async (req:IncomingMessage): Promise<string>  => {
+    return new Promise<string>((resolve,reject)=>{
+        let body = [];
+        req.on('error', (err)=>{
+            reject(error);
+        }).on('data', chunk =>{
+            body.push(chunk);
+        }).on('end',() => {
+            resolve(Buffer.concat(body).toString());
+        })
+    });
 }
+const server = http
+    .createServer(async (req,res)=>{
 
-const server = http.createServer((req,res)=>{
-    const url = new URL(req.url?? "", "http://localhost:3000");
+        //parse the segments
+        const url = new URL(req.url?? "", "http://localhost:3000");
+        const segments = url.pathname.split("/").filter((seg) => seg.trim() !== ""); // remove empty segments
 
+        //parse the body
+        const reqBody = await readBody(req);
+
+        const {status,resBody} = controller.handle(req.method ?? "", segments,reqBody);
 });
 
 server.listen(3000);
