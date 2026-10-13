@@ -1,13 +1,21 @@
-import type {User} from "./types.js";
+import type {User, UserCreateRequest, UserDeleteRequest, UserGetRequest, UserUpdateRequest} from "./types.js";
 const getUsers = (): User[] => {
     return [];
 }
-const getUser = (id:string) : User | null => {
+const getUser = (req:UserGetRequest) : User | null => {
     return null;
 }
 
-const addUser = (input:{name:string, age:number}):void => {
-    
+const addUser = (req:UserCreateRequest):void => {
+    return;
+}
+
+const updateUser = (req:UserUpdateRequest):void => {
+    return;
+}
+
+const deleteUser = (req:UserDeleteRequest): void => {
+    return;
 }
 
 export default {getUser, getUsers, addUser, updateUser, deleteUser};
