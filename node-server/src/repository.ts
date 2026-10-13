@@ -1,10 +1,11 @@
 import type {User} from "./types.js";
-export default class UserDatabase{
+
+export default class UserRepository{
     private cache: Map<number, User>;
     private idIterator:number = 0;
 
     constructor(){
-        this.cache = new Map();
+        this.cache = new Map(); // use a map for toy
     }
 
     public getAllUsers():User[]{
@@ -22,7 +23,7 @@ export default class UserDatabase{
             age:age,
         }
         this.cache.set(u.id, u);
-        this.idIterator +=1;
+        this.idIterator +=1; // use an incrementing id
         return u;
     }
 

@@ -1,21 +1,26 @@
-import type {User, UserCreateRequest, UserDeleteRequest, UserGetRequest, UserUpdateRequest} from "./types.js";
-const getUsers = (): User[] => {
-    return [];
-}
-const getUser = (req:UserGetRequest) : User | null => {
-    return null;
-}
+import UserRepository from "./repository.js"
+import type { User } from "./types.js";
 
-const addUser = (req:UserCreateRequest):void => {
-    return;
+type HTTPMethod = (typeof Controller.supportedMethods)[number];
+const Status = {
+    NOT_FOUND:404,
+    OK:200
 }
+type Status = (typeof Status)[keyof typeof Status];
 
-const updateUser = (req:UserUpdateRequest):void => {
-    return;
+export default class Controller{
+    private repository: UserRepository;
+    static supportedMethods = ["GET", "DELETE", "PATCH", "POST"] as const;
+    
+    constructor(repo:UserRepository){
+        this.repository = repo;
+    }
+
+    public handle(method:HTTPMethod, segments:string[], body:string):{status:Status, body:User | User[] | undefined} {
+        const response = {
+            status:200,
+            body:undefined
+        }
+        return response;
+    }
 }
-
-const deleteUser = (req:UserDeleteRequest): void => {
-    return;
-}
-
-export default {getUser, getUsers, addUser, updateUser, deleteUser};
