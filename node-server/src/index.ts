@@ -8,8 +8,6 @@ import Controller from "./controller.js";
 * React Router, Next.js page layouts, etc.
 */
 
-
-
 const controller = new Controller(new UserRepository());
 
 const readBody = async (req:IncomingMessage): Promise<string>  => {
@@ -35,7 +33,7 @@ const server = http
         const reqBody = await readBody(req);
 
         const {status,resBody} = controller.handle(req.method ?? "", segments,reqBody);
-        
+
         res.statusCode=status;
         res.setHeader('Content-Type','application/json');
         res.end(JSON.stringify(resBody));
