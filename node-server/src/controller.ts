@@ -44,13 +44,22 @@ export default class Controller{
         };
     }
 
-    public handle(method:string, segments:string[], body:string):{status:Status, resBody:User | User[] | undefined} {
+    public handle(method:string, segments:string[], body:string): ReturnType<RouteHandler> {
         //method is GET/POST/PATCH/DELETE
         //segments are resourc
         if(Controller.supportedMethods.includes(method)){
-            const route:string = segments[0];
+            //make sure resource segment exists
+            const resource:string | undefined = segments[0];
+            if(!resource) return {status:Status.NOT_FOUND, resBody:undefined};
+
+            //parse id if its present
+            const id: string | undefined = segments[1];
+            const route = `${method} ${resource}${id ? "/:id" : ""}`
             
-            return this.routes[`${method} ${segments[0]}`]()
+            // get and call handler
+            const handler = this.routes[route];
+            if(!handler) return {status:Status.NOT_FOUND, resBody:undefined}
+            return handler(id, body);
         }else{
             return {status: Status.NOT_ALLOWED, resBody:undefined}
         }
