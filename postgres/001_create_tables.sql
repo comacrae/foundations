@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS authors (
 
 CREATE TABLE IF NOT EXISTS books (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    author_id integer REFERENCES authors (id),
+    author_id integer NOT NULL REFERENCES authors (id),
     title text NOT NULL,
     pages integer CHECK (pages > 0),
     publish_date date NULL
