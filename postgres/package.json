@@ -1,0 +1,11 @@
+{
+  "name": "postgres",
+  "version": "1.0.0",
+  "description": "Manual postgres migration + setup project for practicing foundational knowledge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
