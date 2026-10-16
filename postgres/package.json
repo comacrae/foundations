@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Manual postgres migration + setup project for practicing foundational knowledge",
-  "main": "./dist/index.js",
+  "main": "./dist/migrate.js",
   "scripts": {
     "migrate": "tsc && node dist/migrate.js"
   },
