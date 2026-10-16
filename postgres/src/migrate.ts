@@ -5,7 +5,8 @@
 * unseen files in order.
 */
 import pg from "pg";
-import fs from "node:fs";
+import {readdir, readFile} from "node:fs/promises";
+import { join } from "node:path";
 import { loadEnvFile} from "node:process";
 
 // import env file
@@ -24,43 +25,52 @@ await client.connect();
 //create schema_migrations if it doesnt exist (filename key + applied_at timestamp)
 
 try{
+
     if(process.env.MIGRATION_DIR_PATH === undefined)
         throw new Error(`MIGRATION_DIR_PATH is undefined`);
-await client.query(
-    `CREATE TABLE IF NOT EXISTS migrations (
-        filename text PRIMARY KEY,
-        applied_at timestamptz NOT NULL DEFAULT NOW()
-    );`
-);
 
-//read migrations directory
-let migrationFiles = fs.readdir(
-    process.env.MIGRATION_DIR_PATH,
-    {}, 
-    (err,files)=>{
-        if(err)
-            throw new Error(err.message);
-        files.forEach((file) => {
-            console.log(file);
-        })
-});
-//const 
-// keep only sql files
+    //read migrations directory and filter for only .sql files
+    let migrationFiles:string[] = await readdir(process.env.MIGRATION_DIR_PATH)
+        .then(
+            (filenames) => filenames
+            .filter((filename) => filename.endsWith(".sql"))
+            .sort() // ascending, utf-8 encoded order
+        );
 
-// sort files by name 
+    // create migrations table if it doesnt exist
+    await client.query(
+        `CREATE TABLE IF NOT EXISTS migrations (
+            filename text PRIMARY KEY,
+            applied_at timestamptz NOT NULL DEFAULT NOW()
+        );`
+    );
 
-// get all filenames from schema migration
+    // get all filenames from schema migration
+    const result = await client.query<{filename:string}>( `select filename from migrations`);
 
-// for sql files in the mgiration dir NOT in migration table
+    const existingMigrations:string[] = result.rows
+    .map((row) => row.filename);
 
-// 1. begin a transaction
-// 2. apply sql from the file
-// 3. add the filename to the migration table
-// 4. commit the transaction or rollback if failure
+    // for sql files in the mgiration dir NOT in migration table
+    for(const filename of migrationFiles){
+        if(!existingMigrations.includes(filename)){
+            // get full filepath
+            const filepath = join(process.env.MIGRATION_DIR_PATH, filename);
+            // get command from file
+            const fileQuery = await readFile(filepath);
+            console.log(fileQuery);
+            // 1. begin a transaction
+            // 2. apply sql from the file
+            // 3. add the filename to the migration table
+            // 4. commit the transaction or rollback if failure
+        }
+    }
+
+
 }catch(err){
     console.error(err);
 }finally{
-    client.end();
+    await client.end();
     // close connection
     console.log("Connection closed");
 
