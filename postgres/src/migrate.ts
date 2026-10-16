@@ -5,12 +5,16 @@
 * unseen files in order.
 */
 import pg from "pg";
+import fs from "node:fs";
+import { loadEnvFile} from "node:process";
 
+// import env file
+loadEnvFile("../.env");
 const client = new pg.Client({
-    host: "localhost",
-    port: 5678,
-    user:"postgres",
-    password:"password" // obviously would use .env normally
+    host: process.env.POSTGRES_HOST ?? "localhost",
+    port: Number(process.env.POSTGRES_PORT) ?? 5678,
+    user:process.env.POSTGRES_USER ?? "postgres",
+    password:process.env.POSTGRES_PASSWORD ?? "password"
 });
 
 //connect to postgres
@@ -25,10 +29,10 @@ const createMigrationSchemaQuery = new pg
         applied_at date NOT NULL DEFAULT NOW()
     )
 `);
-client.query(createMigrationSchemaQuery);
+//client.query(createMigrationSchemaQuery);
 
 //read migrations directory
-
+//const 
 // keep only sql files
 
 // sort files by name 
