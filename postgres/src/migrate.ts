@@ -57,18 +57,33 @@ try{
             // get full filepath
             const filepath = join(process.env.MIGRATION_DIR_PATH, filename);
             // get command from file
-            const fileQuery = await readFile(filepath);
-            console.log(fileQuery);
+            const sql = await readFile(filepath, "utf-8");
+
             // 1. begin a transaction
+
+            await client.query("BEGIN TRANSACTION;");
+
             // 2. apply sql from the file
+            await client.query(sql);
+
             // 3. add the filename to the migration table
+            await client.query(
+                `
+                INSERT INTO migrations (filename)
+                VALUES ($1::text);
+                `,[filename]
+            )
+
             // 4. commit the transaction or rollback if failure
+            await client.query("COMMIT;");
         }
     }
 
 
 }catch(err){
     console.error(err);
+    await client.query("ROLLBACK;");
+    process.exitCode = 1;
 }finally{
     await client.end();
     // close connection
