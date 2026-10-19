@@ -8,15 +8,11 @@ import pg from "pg";
 import {readdir, readFile} from "node:fs/promises";
 import { join } from "node:path";
 import { loadEnvFile} from "node:process";
+import { getClient } from "./db.js";
 
 // import env file
 loadEnvFile(".env");
-const client = new pg.Client({
-    host: process.env.POSTGRES_HOST ?? "localhost",
-    port: process.env.POSTGRES_PORT ? Number(process.env.POSTGRES_PORT) : 5678,
-    user:process.env.POSTGRES_USER ?? "postgres",
-    password:process.env.POSTGRES_PASSWORD ?? "password"
-});
+const client = getClient();
 
 
 //connect to postgres
@@ -61,7 +57,7 @@ try{
 
             // 1. begin a transaction
 
-            await client.query("BEGIN TRANSACTION;");
+            await client.query('BEGIN TRANSACTION;');
 
             // 2. apply sql from the file
             await client.query(sql);
@@ -75,7 +71,7 @@ try{
             )
 
             // 4. commit the transaction or rollback if failure
-            await client.query("COMMIT;");
+            await client.query('COMMIT;');
         }
     }
 
