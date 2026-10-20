@@ -4,14 +4,7 @@ type Book = {
     pages: number;
     publishDate?:Date
 };
-export async function insertAuthor(pool:pg.Pool,name:string, birthDate:Date, books:Book[]):Promise<void>{
-    //connect client
-    const client = await pool.connect();
-    let booksInserted: string | undefined = undefined;
-
-    //start transaction
-    try{
-        await client.query(`BEGIN TRANSACTION`);
+export async function insertAuthor(client:pg.Client,name:string, birthDate:Date):Promise<number>{
 
         //insert one author with parameters for name and birth date and get their id
         let result = await client.query<{id:number}>(
@@ -21,38 +14,27 @@ export async function insertAuthor(pool:pg.Pool,name:string, birthDate:Date, boo
             `,
             [name, birthDate]
         );
+        const authorId = result.rows[0]?.id;
+        if(authorId === undefined)
+            throw new Error("Author ID failed")
+        return authorId;
+}
 
-        const authorId = result.rows[0]!.id;
-        //insert books for author passing returned id as param
-        books.forEach(async (book) => {
-            await client.query(
-                ` INSERT INTO books (author_id, title, pages, publish_date)
-                VALUES  ($1, ${book.title} , ${book.pages}, ${book.publishDate?? 'NULL'});
-                `, [authorId]
-            );
-        })
+export async function insertBooks(client:pg.Client,authorId:number, books:Book[]): Promise<{title:string;name:string}[]>{
+    await client.query(
+        ` INSERT INTO books (author_id, title, pages, publish_date)
+        SELECT $1, * FROM unnest($2::text[], $3::int[], $4::date[])
+        `, [authorId, 
+            books.map(book => book.title), 
+            books.map(book=>book.pages), 
+            books.map(book => book.publishDate?? null)
+        ]
+    );
         
-        await client.query(`COMMIT;`);
-        // select author back by id
-        const authorResult = await client.query<{id:number, name:string, birthdate:Date}>(
-            `select * from authors where id = $1`, [authorId]
-        );
-
-        if(!authorResult)
-            throw new Error("Author didn't insert correctly");
-
         // run a join to get every book title with its author name, filtered to given author
         const bookQuery = await client.query<{name:string, title:string}>(
             `select books.title, authors.name from 
             authors inner join books on authors.id = authors.id
             `);
-        booksInserted = bookQuery.rows.join("\n");
-    }catch(err){
-        await client.query(`ROLLBACK;`);
-    }finally{
-        // log results and close connection
-        if(booksInserted)
-            console.log(`Inserted books: ${booksInserted}`);
-        client.release();
-    }
+            return bookQuery.rows;
 }
