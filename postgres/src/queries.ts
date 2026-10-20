@@ -37,7 +37,7 @@ export async function insertBooks(client:pg.ClientBase,authorId:number, books:Bo
 
 export async function getBooksByAuthor(client:pg.ClientBase, authorId:number):Promise<{name:string;title:string;}[]>{
     const result = await client.query<{name:string; title:string}>(`
-        SELECT b.title, a.name, 
+        SELECT b.title, a.name 
         FROM books b JOIN authors a
         ON a.id = b.author_id
         WHERE b.author_id = $1

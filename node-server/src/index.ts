@@ -1,5 +1,5 @@
 import http, { IncomingMessage } from "node:http";
-import UserRepository from "./repository.js";
+import AuthorRepository from "./repository.js";
 import UserService from "./service.js";
 import Controller from "./controller.js";
 import {Status} from "./controller.js";
@@ -11,7 +11,7 @@ import {Status} from "./controller.js";
 * React Router, Next.js page layouts, etc.
 */
 
-const controller = new Controller(new UserService(new UserRepository()));
+const controller = new Controller(new UserService(new AuthorRepository()));
 
 const readBody = async (req:IncomingMessage): Promise<string>  => {
     return new Promise<string>((resolve,reject)=>{

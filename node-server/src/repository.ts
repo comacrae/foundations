@@ -1,43 +1,35 @@
-import type {User} from "./types.js";
+import type {Author, AuthorCreateRequest} from "./types.js";
 
-export default class UserRepository{
-    private cache: Map<number, User>;
+export default class AuthorRepository{
+    private cache: Map<number, Author>;
     private idIterator:number = 0;
 
     constructor(){
         this.cache = new Map(); // use a map for toy
     }
 
-    public getAllUsers():User[]{
-        return Array.from(this.cache.values());
+    public getAllAuthors():Author[]{
+        return[]
     }
 
-    public getUser(id:number):User|undefined{
+    public getAuthor(id:number):Author|undefined{
         return this.cache.get(id);
     }
 
-    public addUser(name:string, age:number):User{
-        const u:User = {
-            id: this.idIterator,
+    public addAuthor(name:string, birthDate:Date):Author{
+        const addAuthor:AuthorCreateRequest = {
             name:name,
-            age:age,
+            birthDate:birthDate,
         }
-        this.cache.set(u.id, u);
-        this.idIterator +=1; // use an incrementing id
-        return u;
+        
+        return {id:1, name,birthDate};
     }
 
-    public deleteUser(id:number): boolean{
-        return this.cache.delete(id);
+    public deleteAuthor(id:number): boolean{
+        return true;
     }
 
-    public updateUser(id:number, name?:string,age?:number):User|undefined{
-        const u = this.cache.get(id);
-        if(u){
-            u.name = name || u.name;
-            u.age = age || u.age;
-            this.cache.set(u.id, u);
-        }
-        return u;
+    public updateAuthor(id:number, name?:string,birthDate?:Date):Author|undefined{
+        return undefined;
     }
 }
