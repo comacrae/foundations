@@ -4,7 +4,7 @@ type Book = {
     pages: number;
     publishDate?:Date
 };
-export async function insertAuthor(client:pg.Client,name:string, birthDate:Date):Promise<number>{
+export async function insertAuthor(client:pg.ClientBase,name:string, birthDate:Date):Promise<number>{
 
         //insert one author with parameters for name and birth date and get their id
         let result = await client.query<{id:number}>(
@@ -20,7 +20,7 @@ export async function insertAuthor(client:pg.Client,name:string, birthDate:Date)
         return authorId;
 }
 
-export async function insertBooks(client:pg.Client,authorId:number, books:Book[]): Promise<{title:string;name:string}[]>{
+export async function insertBooks(client:pg.ClientBase,authorId:number, books:Book[]): Promise<{title:string;name:string}[]>{
     await client.query(
         ` INSERT INTO books (author_id, title, pages, publish_date)
         SELECT $1, * FROM unnest($2::text[], $3::int[], $4::date[])
@@ -34,7 +34,7 @@ export async function insertBooks(client:pg.Client,authorId:number, books:Book[]
         // run a join to get every book title with its author name, filtered to given author
         const bookQuery = await client.query<{name:string, title:string}>(
             `select books.title, authors.name from 
-            authors inner join books on authors.id = authors.id
+            authors inner join books on authors.id = books.author_id
             `);
             return bookQuery.rows;
 }
