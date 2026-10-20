@@ -1,24 +1,19 @@
 import pg from "pg";
 import {loadEnvFile} from "node:process";
 
+
 export function getClient(envPath=".env"): pg.Client{
     loadEnvFile(envPath);
-    return new pg.Client({
-        host: process.env.POSTGRES_HOST ?? "localhost",
-        port: process.env.POSTGRES_PORT ? Number(process.env.POSTGRES_PORT) : 5678,
-        user:process.env.POSTGRES_USER ?? "postgres",
-        password:process.env.POSTGRES_PASSWORD ?? "password"
-    });
+    if(process.env.DATABASE_URL === undefined)
+        throw new Error("Database url not defined in env vars");
+    return new pg.Client({connectionString:process.env.DATABASE_URL});
 }
 
 export function getPool(envPath=".env"): pg.Pool{
     loadEnvFile(envPath);
-    return new pg.Pool({
-        host: process.env.POSTGRES_HOST ?? "localhost",
-        port: process.env.POSTGRES_PORT ? Number(process.env.POSTGRES_PORT) : 5678,
-        user:process.env.POSTGRES_USER ?? "postgres",
-        password:process.env.POSTGRES_PASSWORD ?? "password"
-    });
+    if(process.env.DATABASE_URL === undefined)
+        throw new Error("Database url not defined in env vars");
+    return new pg.Pool({connectionString:process.env.DATABASE_URL});
 }
 
 export async function withTransaction<T>(pool:pg.Pool,work:(client:pg.PoolClient)=>Promise<T>):Promise<T>{
