@@ -17,35 +17,35 @@ export default class Controller{
     constructor(service:UserService){
         this.service = service;
         this.routes = {
-            "GET authors/:id": (id) => {
-                const user = this.service.getAuthor(Number(id));
+            "GET users/:id": (id) => {
+                const user = this.service.getUser(Number(id));
                 if (!user) return {status:Status.NOT_FOUND, resBody:undefined}
                 return {status:Status.OK, resBody:user};
             },
-            "GET authors": () => {
-                return {status:Status.OK, resBody:this.service.getAuthors()}
+            "GET users": () => {
+                return {status:Status.OK, resBody:this.service.getUsers()}
             },
-            "POST authors": (_,body) => {
-                const {name,birthDate}: {name?:string, birthDate?:string} = JSON.parse(body??"");
+            "POST users": (_,body) => {
+                const {name,age}: {name?:string, age?:string} = JSON.parse(body??"");
                 if (name === undefined)
                     throw new Error ("Name must be defined");
-                if (birthDate === undefined)
-                    throw new Error ("Birthdate must be defined");
+                if (age === undefined)
+                    throw new Error ("Name must be defined");
 
-                const user = this.service.addAuthor(name, new Date(birthDate));
+                const user = this.service.addUser(name, Number(age));
                 return {status:Status.OK, resBody:user};
             },
-            "DELETE author/:id": (id,_)=>{
+            "DELETE users/:id": (id,_)=>{
                 if(this.service.deleteUser(Number(id)))
                     return {status:Status.OK, resBody:undefined}
                 else
                     return {status:Status.NOT_FOUND, resBody:undefined}
             },
             "PATCH users/:id": (id,body)=>{
-                const {name, birthDate}:{name?:string, birthDate?:string} = JSON.parse(body ?? "");
-                const date: Date | undefined = birthDate ? new Date(birthDate) : undefined;
+                const {name, age}:{name?:string, age?:string} = JSON.parse(body ?? "");
+                const ageNum: number | undefined = age ? Number(age) : undefined;
                     
-                const user = this.service.updateAuthor(Number(id),name,date);
+                const user = this.service.updateUser(Number(id),name,ageNum);
                 return {status: user? Status.OK : Status.NOT_FOUND, resBody: user};
             }
         };

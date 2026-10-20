@@ -1,26 +1,26 @@
-type Author = {
+type User = {
     id:number;
     name:string;
-    birthDate:Date;
+    age:number;
 }
 
-type AuthorGetRequest = {
+type UserGetRequest = {
     id:string;
 }
 
-type AuthorCreateRequest =  {
+type UserCreateRequest =  {
     name:string;
-    birthDate:Date;
+    age:string
 }
 
-type AuthorUpdateRequest = {
+type UserUpdateRequest = {
     id:string;
     name?:string;
-    birthDate?:string;
+    age?:string;
 }
 
-type AuthorDeleteRequest = {
+type UserDeleteRequest = {
     id:string;
 }
 
-export type {Author, AuthorGetRequest, AuthorDeleteRequest, AuthorUpdateRequest, AuthorCreateRequest};
+export type {User, UserGetRequest, UserCreateRequest, UserDeleteRequest, UserUpdateRequest};
