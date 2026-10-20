@@ -5,7 +5,8 @@
   "description": "Manual postgres migration + setup project for practicing foundational knowledge",
   "main": "./dist/migrate.js",
   "scripts": {
-    "migrate": "tsc && node dist/migrate.js"
+    "migrate": "tsc && node dist/migrate.js",
+    "test:insert": "tsc && node dist/test-inserts.js"
   },
   "author": "",
   "license": "ISC",

@@ -20,10 +20,11 @@ export async function insertAuthor(client:pg.ClientBase,name:string, birthDate:D
         return authorId;
 }
 
-export async function insertBooks(client:pg.ClientBase,authorId:number, books:Book[]): Promise<{title:string;name:string}[]>{
-    await client.query(
+export async function insertBooks(client:pg.ClientBase,authorId:number, books:Book[]): Promise<{title:string; pages:number; publish_date:Date}[]>{
+    const result = await client.query(
         ` INSERT INTO books (author_id, title, pages, publish_date)
         SELECT $1, * FROM unnest($2::text[], $3::int[], $4::date[])
+        RETURNING *;
         `, [authorId, 
             books.map(book => book.title), 
             books.map(book=>book.pages), 
@@ -31,10 +32,17 @@ export async function insertBooks(client:pg.ClientBase,authorId:number, books:Bo
         ]
     );
         
-        // run a join to get every book title with its author name, filtered to given author
-        const bookQuery = await client.query<{name:string, title:string}>(
-            `select books.title, authors.name from 
-            authors inner join books on authors.id = books.author_id
-            `);
-            return bookQuery.rows;
+    return result.rows;
+}
+
+export async function getBooksByAuthor(client:pg.ClientBase, authorId:number):Promise<{name:string;title:string;}[]>{
+    const result = await client.query<{name:string; title:string}>(`
+        SELECT b.title, a.name, 
+        FROM books b JOIN authors a
+        ON a.id = b.author_id
+        WHERE b.author_id = $1
+        ORDER BY 
+        b.publish_date DESC;
+        `, [authorId]);
+    return result.rows;
 }

@@ -1,5 +1,5 @@
 import { withTransaction, getPool} from "./db.js";
-import { insertAuthor, insertBooks} from "./queries.js";
+import { insertAuthor, insertBooks, getBooksByAuthor} from "./queries.js";
 
 const pool = getPool();
 type Book = {
@@ -19,6 +19,6 @@ const books: Book[] = [
 withTransaction(pool, async (client) => {
     const authorId = await insertAuthor(client, "Patrick Rothfuss",  new Date("1973-06-06"));
     const savedBooks = await insertBooks(client, authorId, books);
-
-    console.log(savedBooks);
+    const booksByPatrick = await getBooksByAuthor(client,authorId);
+    console.log(booksByPatrick)
 })
